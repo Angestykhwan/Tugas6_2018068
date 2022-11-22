@@ -13,6 +13,13 @@
         android:theme="@style/NoActionBar"
         tools:targetApi="31">
         <activity
+            android:name=".DestinationActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".RecyclerView"
             android:exported="false">
             <meta-data
@@ -33,6 +40,7 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
+
         <receiver android:name=".AlarmReceiver" />
     </application>
 

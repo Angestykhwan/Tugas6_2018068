@@ -14,108 +14,88 @@ import com.example.pertemuan4_actionbar.databinding.ActivityMainBinding;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 import java.util.Calendar;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import android.os.Bundle;
+import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
+import com.google.android.material.navigation.NavigationView;
+
+public class MainActivity extends AppCompatActivity implements  NavigationView.OnNavigationItemSelectedListener {
     private ActivityMainBinding binding;
     private MaterialTimePicker picker;
     private Calendar calendar;
     private AlarmManager alarmManager;
     private PendingIntent pendingIntent;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+
+        private DrawerLayout drawer;
+        @Override
+        protected void onCreate (Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        //mengaktifkan view binding
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-        createNotificationChannel();
-        binding.selectedTimeBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showTimePicker();
-            }
-        });
-        binding.setAlarmBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setAlarm();
-            }
-        });
-        binding.cancelAlarmBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                cancelAlarm();
-            }
-        });
-    }
+        setContentView(R.layout.activity_main);
+        //mengganti actionbar dengan toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        //memanggil drawer_layout dari activity_main.xml
+        drawer = findViewById(R.id.drawer_layout);
+        NavigationView navigationView =
+                findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        //membuat hamburger icon pada toolbar dan animasinya
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+        //membuat default navigation menu select
+        if (savedInstanceState == null) {
 
-    private void cancelAlarm() {
-        //untuk menggagalkan alarm yang sudah disetel
-        Intent intent = new Intent(this, AlarmReceiver.class);
-        pendingIntent = PendingIntent.getBroadcast(this, 0,
-                intent, 0);
-        if (alarmManager == null) {
-            alarmManager = (AlarmManager)
-                    getSystemService(Context.ALARM_SERVICE);
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                    new ProfileFragment()).commit();
+            navigationView.setCheckedItem(R.id.nav_profile);
         }
-        alarmManager.cancel(pendingIntent);
-        Toast.makeText(this, "Alarm Cancelled",
-                Toast.LENGTH_SHORT).show();
     }
+        //drawer menu fragment handler
+        @Override
+        public boolean onNavigationItemSelected (@NonNull MenuItem item){
+        switch (item.getItemId()) {
+            case R.id.nav_chat:
 
-    private void setAlarm() {
-        //untuk menjalankan alarm yang sudah disetel
-        alarmManager = (AlarmManager)
-                getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this, AlarmReceiver.class);
-        pendingIntent = PendingIntent.getBroadcast(this, 0,
-                intent, 0);
-        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
-                calendar.getTimeInMillis(),
-                AlarmManager.INTERVAL_DAY, pendingIntent);
-        Toast.makeText(this, "Alarm Set Successfully",
-                Toast.LENGTH_SHORT).show();
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                        new ChatFragment()).commit();
+                break;
+            case R.id.nav_alarm:
+
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                        new AlarmFragment()).commit();
+                break;
+            case R.id.nav_profile:
+
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                        new ProfileFragment()).commit();
+                break;
+
+            case R.id.nav_rec:
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                        new Makanan()).commit();
+                break;
+        }
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
-
-    private void showTimePicker() {
-        //memunculkan dialog timepicker menggunakan library dari android
-        picker = new MaterialTimePicker.Builder()
-                .setTimeFormat(TimeFormat.CLOCK_24H)
-                .setHour(12)
-                .setMinute(0)
-                .setTitleText("Select Alarm Time")
-                .build();
-        picker.show(getSupportFragmentManager(), "AlarmManager");
-        //mengeset waktu didalam view
-        picker.addOnPositiveButtonClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (picker.getHour() > 12) {
-                    binding.selectedTime.setText(String.format("%02d : %02d", picker.getHour(), picker.getMinute()));
-                } else {binding.selectedTime.setText(picker.getHour() + " : " + picker.getMinute() + " ");
-                }
-                //menangkap inputan jam kalian lalu memulai alarm
-                calendar = Calendar.getInstance();
-                calendar.set(Calendar.HOUR_OF_DAY, picker.getHour());
-                calendar.set(Calendar.MINUTE, picker.getMinute());
-                calendar.set(Calendar.SECOND, 0);
-                calendar.set(Calendar.MILLISECOND, 0);
+        //on back press behavior
+        @Override
+        public void onBackPressed() {
+            if (drawer.isDrawerOpen(GravityCompat.START)) {
+                drawer.closeDrawer(GravityCompat.START);
             }
-        });
-    }
-
-    private void createNotificationChannel() {
-        //mendeskripsikan channel notifikasi yang akan dibangun
-        CharSequence name = "INI ALARM MANAGER";
-        String description = "PRAKTIKUM BAB5 TENTANG ALARM MANAGER";
-        //tingkat importance = high ( penting sekali )
-        int importance = NotificationManager.IMPORTANCE_HIGH;
-        NotificationChannel channel = new
-                NotificationChannel("AlarmManager", name, importance);
-        channel.setDescription(description);
-        //membuka izin pengaturan dari aplikasi untuk memulai service notifikasi
-        NotificationManager notificationManager =
-                getSystemService(NotificationManager.class);
-        notificationManager.createNotificationChannel(channel);
-    }
+            else {
+                super.onBackPressed();
+            }
+        }
 }

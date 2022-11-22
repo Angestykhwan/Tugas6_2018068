@@ -30,31 +30,7 @@ public class AlarmFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        binding =
-                FragmentAlarmBinding.inflate(getLayoutInflater());
-        getActivity().setContentView(binding.getRoot());
-        createNotificationChannel();
-        binding.selectedTimeBtn.setOnClickListener(new
-                                                           View.OnClickListener() {
-                                                               @Override
-                                                               public void onClick(View view) {
-                                                                   showTimePicker();
-                                                               }
-                                                           });
-        binding.setAlarmBtn.setOnClickListener(new
-                                                       View.OnClickListener() {
-                                                           @Override
-                                                           public void onClick(View view) {
-                                                               setAlarm();
-                                                           }
-                                                       });
-        binding.cancelAlarmBtn.setOnClickListener(new
-                                                          View.OnClickListener() {
-                                                              @Override
-                                                              public void onClick(View view) {
-                                                                  cancelAlarm();
-                                                              }
-                                                          });
+
     }
 
     private void cancelAlarm() {
@@ -138,8 +114,32 @@ public class AlarmFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container, @Nullable Bundle
                                      savedInstanceState) {
-        return
-                inflater.inflate(R.layout.fragment_alarm, container, false);
+        binding =
+                FragmentAlarmBinding.inflate(getLayoutInflater());
+        View V = binding.getRoot();
+        createNotificationChannel();
+        binding.selectedTimeBtn.setOnClickListener(new
+                                                           View.OnClickListener() {
+                                                               @Override
+                                                               public void onClick(View view) {
+                                                                   showTimePicker();
+                                                               }
+                                                           });
+        binding.setAlarmBtn.setOnClickListener(new
+                                                       View.OnClickListener() {
+                                                           @Override
+                                                           public void onClick(View view) {
+                                                               setAlarm();
+                                                           }
+                                                       });
+        binding.cancelAlarmBtn.setOnClickListener(new
+                                                          View.OnClickListener() {
+                                                              @Override
+                                                              public void onClick(View view) {
+                                                                  cancelAlarm();
+                                                              }
+                                                          });
+        return V;
     }
 
 
